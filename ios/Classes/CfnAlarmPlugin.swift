@@ -224,16 +224,13 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
             content.body = body
             args["filePath"] = "\(fileUrl.absoluteString)"
             content.userInfo = args
-            
-//            content.userInfo = ["audioPath": "\(fileUrl.absoluteString)",
-//                                "loopAudio":loopAudio,
-//                                "vibrate":vibrate
-//            ] as [String : Any]
 
             if subTitle.isEmpty == false {
                 content.subtitle = subTitle
             }
 
+            content.sound = UNNotificationSound.default
+            
             var dateComponents = DateComponents()
             dateComponents.year = Calendar.current.component(.year, from: date)
             dateComponents.month = Calendar.current.component(.month, from: date)

@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
         setting: AlarmSetting(
             id: 123,
             dateTime: DateFormat('yyyy-MM-dd HH:mm:ss')
-                .format(DateTime.now().copyWith(second: 0, minute: 21)),
+                .format(DateTime.now().copyWith(second: 0, minute: 15)),
             audioPath: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
             title: "Notification",
             // loopAudio: true,
