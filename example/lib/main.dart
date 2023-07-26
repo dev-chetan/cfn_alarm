@@ -5,8 +5,6 @@ import 'package:cfn_alarm/cfn_alarm.dart';
 import 'package:cfn_alarm/models/alarm_setting.dart';
 import 'package:intl/intl.dart';
 
-
-
 void main() {
   runApp(const MyApp());
 }
@@ -20,21 +18,29 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final _cfnAlarmPlugin = CfnAlarm();
+  String _platformVersion1 = 'Unknown';
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
+    initCallBack();
   }
 
   /// NOTE : DATE TIME SET THIS FORMAT : yyyy-MM-dd HH:mm:ss
   Future<void> initPlatformState() async {
+    CfnAlarm.onNotificationListener().asStream().listen((event) {
+      print("onNotificationListener : $event");
+    });
+
+    CfnAlarm.onNotificationTapListener().asStream().listen((event) {
+      print("onNotificationTapListener : $event");
+    });
     var initScheduleAlarm = await CfnAlarm.initScheduleAlarm(
         setting: AlarmSetting(
-            id: 0000,
+            id: 123,
             dateTime: DateFormat('yyyy-MM-dd HH:mm:ss')
-                .format(DateTime.now().copyWith(second: 0, minute: 36)),
+                .format(DateTime.now().copyWith(second: 0, minute: 21)),
             audioPath: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
             title: "Notification",
             // loopAudio: true,
@@ -54,9 +60,28 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+            child: Column(
+          children: [
+            Text('Running on: $_platformVersion\n'),
+            const SizedBox(height: 35),
+            TextButton(
+                onPressed: () async {
+                  var initScheduleAlarm =
+                      await CfnAlarm.removeScheduleAlarm(id: 123);
+                  setState(() {
+                    _platformVersion1 = initScheduleAlarm!.toString();
+                  });
+                },
+                child: Text("Stop Schedule Alarm : $_platformVersion1"))
+          ],
+        )),
       ),
     );
+  }
+
+  Future<void> initCallBack() async {
+    // CfnAlarm.onNotificationListener().asStream().listen((event) {
+    //   print("onNotificationListener : $event");
+    // });
   }
 }

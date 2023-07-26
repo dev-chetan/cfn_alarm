@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -12,7 +14,8 @@ class MethodChannelCfnAlarm extends CfnAlarmPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
   }
 
@@ -27,7 +30,22 @@ class MethodChannelCfnAlarm extends CfnAlarmPlatform {
   @override
   Future removeScheduleAlarm({required int id}) async {
     final result =
-    await methodChannel.invokeMethod<dynamic>('removeScheduleAlarm', id);
+        await methodChannel.invokeMethod<dynamic>('removeScheduleAlarm', id);
     return result;
   }
+
+  @override
+  Future onNotificationTapListener() async {
+    final result =
+        await methodChannel.invokeMethod<dynamic>('onNotificationTapListener');
+    return result;
+  }
+
+  @override
+  Future onNotificationListener() async {
+    final result =
+        await methodChannel.invokeMethod<dynamic>('onNotificationListener');
+    return result;
+  }
+
 }

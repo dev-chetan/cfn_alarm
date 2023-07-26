@@ -9,9 +9,19 @@ import AudioToolbox
 public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterDelegate {
 
     var player: AVPlayer?
+    var vibrate: Bool?
+    
+    // FOR GLOBLE VARIABLE
     var result: FlutterResult?
     var call: FlutterMethodCall?
-    var vibrate: Bool?
+    
+    // FOR NOTIFICATION CALL BACK
+    var onNotificationListenerResult: FlutterResult?
+    var onNotificationListenerCall: FlutterMethodCall?
+    
+    // FOR ON TAP NOTIFICATION CALL BACK
+    var onNotificationTapListenerResult: FlutterResult?
+    var onNotificationTapListenerCall: FlutterMethodCall?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "cfn_alarm", binaryMessenger: registrar.messenger())
@@ -24,29 +34,35 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
         self.result = result
         self.call = call
         // START WORK FUNCTION :-
-        handleChannel()
+        handleChannel(call: call, result: result)
     }
 
     // Handle the alarm when the app is in the foreground
     public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
-        let audioPath = userInfo["audioPath"] as! String
+        let filePath = userInfo["filePath"] as! String
         let loopAudio = userInfo["loopAudio"] as! Bool
-        print("userNotificationCenter")
         vibrate = userInfo["vibrate"] as? Bool
-        self.playSongFromFilePath(audioPath: audioPath,loopAudio:loopAudio,vibrate:vibrate!)
+        print("#########################")
+        self.playSongFromFilePath(filePath: filePath,loopAudio:loopAudio,vibrate:vibrate!)
+        if self.onNotificationListenerResult != nil {
+            self.onNotificationListenerResult!(userInfo)
+        }
         completionHandler([.alert, .sound])
     }
 
     // Handle the alarm when the user interacts with the notification
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         player = nil
+        if self.onNotificationTapListenerResult != nil {
+            self.onNotificationTapListenerResult!(response.notification.request.content.userInfo)
+        }
         completionHandler()
     }
 
     // PLAY SONG FROM FILE PATH
-    func playSongFromFilePath(audioPath: String, loopAudio: Bool, vibrate: Bool) {
-        guard let url = URL(string: audioPath) else {
+    func playSongFromFilePath(filePath: String, loopAudio: Bool, vibrate: Bool) {
+        guard let url = URL(string: filePath) else {
             print("Invalid song URL")
             return
         }
@@ -83,9 +99,15 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
     }
 
     // CHANNEL LIST DOWN :-
-    func handleChannel(){
+    func handleChannel(call: FlutterMethodCall, result: @escaping FlutterResult){
         if self.call!.method == "getPlatformVersion" {
 
+        } else if self.call!.method == "onNotificationTapListener" {
+            self.onNotificationTapListenerCall = call
+            self.onNotificationTapListenerResult = result
+        } else if self.call!.method == "onNotificationListener" {
+            self.onNotificationListenerCall = call
+            self.onNotificationListenerResult = result
         } else if self.call!.method == "scheduleAlarm" {
             checkPermissionStatus()
         } else if self.call!.method == "removeScheduleAlarm" {
@@ -136,7 +158,7 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
 
     // PERMISSION REQUEST FOR NOTIFICATION :-
     func permission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .carPlay]) { (granted, error) in
             if granted {
                 self.checkPermissionStatus()
             } else {
@@ -183,7 +205,7 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
 
         // GET DATA FORM FLUTTER :-
         print("scheduleAlarm(.......){.......}")
-        let args = self.call!.arguments as! Dictionary<String, Any>
+        var args = self.call!.arguments as! Dictionary<String, Any>
         let id = args["id"] as! Int
         let dateTime = args["dateTime"] as! String
         let loopAudio = args["loopAudio"] as! Bool
@@ -200,11 +222,13 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
             let content = UNMutableNotificationContent()
             content.title = title
             content.body = body
-
-            content.userInfo = ["audioPath": "\(fileUrl.absoluteString)",
-                                "loopAudio":loopAudio,
-                                "vibrate":vibrate
-            ] as [String : Any]
+            args["filePath"] = "\(fileUrl.absoluteString)"
+            content.userInfo = args
+            
+//            content.userInfo = ["audioPath": "\(fileUrl.absoluteString)",
+//                                "loopAudio":loopAudio,
+//                                "vibrate":vibrate
+//            ] as [String : Any]
 
             if subTitle.isEmpty == false {
                 content.subtitle = subTitle

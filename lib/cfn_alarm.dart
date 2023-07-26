@@ -15,4 +15,12 @@ class CfnAlarm {
   static Future<dynamic> removeScheduleAlarm({required int id}) async {
     return await CfnAlarmPlatform.instance.removeScheduleAlarm(id: id);
   }
+
+  static Future<dynamic> onNotificationTapListener() async {
+    return await CfnAlarmPlatform.instance.onNotificationTapListener();
+  }
+
+  static Future<dynamic> onNotificationListener() async {
+    return await CfnAlarmPlatform.instance.onNotificationListener();
+  }
 }
