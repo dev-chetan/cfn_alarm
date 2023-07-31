@@ -118,14 +118,20 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
     }
 
     // STOP PENDING NOTIFICATION
-    func stopScheduleAlarm(){
+    func stopScheduleAlarm() {
         // GET DATA FORM FLUTTER :-
         let id = self.call!.arguments as! Int
         let notificationCenter = UNUserNotificationCenter.current()
         notificationCenter.getPendingNotificationRequests { (requests) in
             for request in requests {
                 if(request.identifier == String(id)){
+                    if self.player != nil {
+                        self.player = nil
+                    }
                     notificationCenter.removePendingNotificationRequests(withIdentifiers: [String(id)])
+                    if self.player == nil {
+                        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+                    }
                     self.result!(self.responseStatus(code:"200",message:"Remove scheduled alarm successfully Identifier : \(id)"))
                     return
                 }
@@ -158,7 +164,7 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
 
     // PERMISSION REQUEST FOR NOTIFICATION :-
     func permission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .carPlay]) { (granted, error) in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
             if granted {
                 self.checkPermissionStatus()
             } else {
@@ -208,8 +214,6 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
         var args = self.call!.arguments as! Dictionary<String, Any>
         let id = args["id"] as! Int
         let dateTime = args["dateTime"] as! String
-        let loopAudio = args["loopAudio"] as! Bool
-        let vibrate = args["vibrate"] as! Bool
         let title = args["title"] as! String
         let body = args["body"] as! String
         let subTitle = args["subTitle"] as! String
@@ -244,7 +248,7 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
             
             // Create a trigger with the date components
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-            
+        
 
             // Create a notification request
             let request = UNNotificationRequest(identifier: String(id), content: content, trigger: trigger)
