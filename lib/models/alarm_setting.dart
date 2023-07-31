@@ -13,6 +13,7 @@ class AlarmSetting {
   String? audioPath;
   bool? loopAudio;
   bool? vibrate;
+  bool? snoozeStatus;
   String? title;
   String? body;
   String? subTitle;
@@ -28,6 +29,7 @@ class AlarmSetting {
       required this.body,
       required this.audioType,
       this.loopAudio = true,
+      this.snoozeStatus = true,
       this.vibrate = true,
       this.subTitle = "",
       this.filePath = "",
@@ -38,6 +40,7 @@ class AlarmSetting {
     dateTime = json['dateTime'];
     audioPath = json['audioPath'];
     loopAudio = json['loopAudio'];
+    snoozeStatus = json['snoozeStatus'];
     title = json['title'];
     body = json['body'];
     subTitle = json['subTitle'];
@@ -52,6 +55,7 @@ class AlarmSetting {
       "dateTime": dateTime,
       "loopAudio": loopAudio,
       "vibrate": vibrate,
+      "snoozeStatus": snoozeStatus,
       "title": title,
       "subTitle": subTitle,
       "body": body,

@@ -30,6 +30,7 @@ class CfnAlarm {
         vibrate: result['vibrate'],
         subTitle: result['subTitle'],
         filePath: result['filePath'],
+        snoozeStatus: result['snoozeStatus'],
         barrierDismissible: result['barrierDismissible']);
   }
 
@@ -46,6 +47,7 @@ class CfnAlarm {
         vibrate: result['vibrate'],
         subTitle: result['subTitle'],
         filePath: result['filePath'],
+        snoozeStatus: result['snoozeStatus'],
         barrierDismissible: result['barrierDismissible']);
   }
 
