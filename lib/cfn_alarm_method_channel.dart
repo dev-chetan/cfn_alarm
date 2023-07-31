@@ -33,17 +33,17 @@ class MethodChannelCfnAlarm extends CfnAlarmPlatform {
   }
 
   @override
-  Future onNotificationTapListener() async {
+  Future<dynamic> onNotificationTapListener() async {
     final result =
         await methodChannel.invokeMethod<dynamic>('onNotificationTapListener');
+
     return result;
   }
 
   @override
-  Future onNotificationListener() async {
+  Future<dynamic> onNotificationListener() async {
     final result =
         await methodChannel.invokeMethod<dynamic>('onNotificationListener');
     return result;
   }
-
 }

@@ -30,17 +30,17 @@ class _MyAppState extends State<MyApp> {
   /// NOTE : DATE TIME SET THIS FORMAT : yyyy-MM-dd HH:mm:ss
   Future<void> initPlatformState() async {
     CfnAlarm.onNotificationListener().asStream().listen((event) {
-      print("onNotificationListener : $event");
+      print("onNotificationListener : ${event.toJson()}");
     });
 
     CfnAlarm.onNotificationTapListener().asStream().listen((event) {
-      print("onNotificationTapListener : $event");
+      print("onNotificationListener : ${event.toJson()}");
     });
     var initScheduleAlarm = await CfnAlarm.initScheduleAlarm(
         setting: AlarmSetting(
             id: 123,
             dateTime: DateFormat('yyyy-MM-dd HH:mm:ss')
-                .format(DateTime.now().copyWith(second: 0, minute: 15)),
+                .format(DateTime.now().copyWith(second: 0, minute: 17)),
             audioPath: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
             title: "Notification",
             // loopAudio: true,

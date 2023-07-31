@@ -1,16 +1,24 @@
+import 'dart:convert';
+
 import '../app_enums.dart';
 
+AlarmSetting alarmSettingFromJson(String str) =>
+    AlarmSetting.fromJson(json.decode(str));
+
+String alarmSettingToJson(AlarmSetting data) => json.encode(data.toJson());
+
 class AlarmSetting {
-  final int id;
-  final String dateTime;
-  final String audioPath;
-  final bool? loopAudio;
-  final bool? vibrate;
-  final String title;
-  final String body;
-  final String? subTitle;
-  final bool? barrierDismissible;
-  final AudioType audioType;
+  int? id;
+  String? dateTime;
+  String? audioPath;
+  bool? loopAudio;
+  bool? vibrate;
+  String? title;
+  String? body;
+  String? subTitle;
+  bool? barrierDismissible;
+  AudioType? audioType;
+  String? filePath;
 
   AlarmSetting(
       {required this.id,
@@ -22,7 +30,21 @@ class AlarmSetting {
       this.loopAudio = true,
       this.vibrate = true,
       this.subTitle = "",
+      this.filePath = "",
       this.barrierDismissible = true});
+
+  AlarmSetting.fromJson(dynamic json) {
+    id = json['id'];
+    dateTime = json['dateTime'];
+    audioPath = json['audioPath'];
+    loopAudio = json['loopAudio'];
+    title = json['title'];
+    body = json['body'];
+    subTitle = json['subTitle'];
+    barrierDismissible = json['barrierDismissible'];
+    audioType = json['audioType'];
+    filePath = json['filePath'];
+  }
 
   toJson() {
     var data = {
@@ -33,7 +55,8 @@ class AlarmSetting {
       "title": title,
       "subTitle": subTitle,
       "body": body,
-      "audioType": audioType.name,
+      "filePath": filePath,
+      "audioType": audioType!.name,
       "audioPath": audioPath,
       "barrierDismissible": barrierDismissible
     };
