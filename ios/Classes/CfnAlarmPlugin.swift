@@ -6,7 +6,20 @@ import Foundation
 import AudioToolbox
 
 
-public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterDelegate {
+public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterDelegate, FlutterStreamHandler {
+
+
+    var flutterEvent: FlutterEventSink?
+
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.flutterEvent = events
+        print("Ca;;")
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return nil
+    }
 
     var player: AVPlayer?
     var vibrate: Bool?
@@ -14,18 +27,16 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
     // FOR GLOBLE VARIABLE
     var result: FlutterResult?
     var call: FlutterMethodCall?
-    
-    // FOR NOTIFICATION CALL BACK
-    var onNotificationListenerResult: FlutterResult?
-    var onNotificationListenerCall: FlutterMethodCall?
-    
-    // FOR ON TAP NOTIFICATION CALL BACK
-    var onNotificationTapListenerResult: FlutterResult?
-    var onNotificationTapListenerCall: FlutterMethodCall?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
+        
         let channel = FlutterMethodChannel(name: "cfn_alarm", binaryMessenger: registrar.messenger())
+        
+        let channelNew = FlutterEventChannel(name: "dev_chetan_onReceived",
+                                          binaryMessenger: registrar.messenger())
+        
         let instance = CfnAlarmPlugin()
+        channelNew.setStreamHandler(instance)
         UNUserNotificationCenter.current().delegate = instance
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
@@ -40,23 +51,26 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
     // Handle the alarm when the app is in the foreground
     public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let userInfo = notification.request.content.userInfo
+        let dictionary: [String: Any] = [
+            "onReceived": userInfo
+        ]
+        self.flutterEvent!(dictionary)
         let filePath = userInfo["filePath"] as! String
         let loopAudio = userInfo["loopAudio"] as! Bool
         vibrate = userInfo["vibrate"] as? Bool
-        print("#########################")
         self.playSongFromFilePath(filePath: filePath,loopAudio:loopAudio,vibrate:vibrate!)
-        if self.onNotificationListenerResult != nil {
-            self.onNotificationListenerResult!(userInfo)
-        }
-        completionHandler([.alert, .sound])
+        
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        completionHandler([])
     }
 
     // Handle the alarm when the user interacts with the notification
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         player = nil
-        if self.onNotificationTapListenerResult != nil {
-            self.onNotificationTapListenerResult!(response.notification.request.content.userInfo)
-        }
+        let dictionary: [String: Any] = [
+            "onTapReceived": response.notification.request.content.userInfo
+        ]
+        self.flutterEvent!(dictionary)
         completionHandler()
     }
 
@@ -101,17 +115,12 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
     // CHANNEL LIST DOWN :-
     func handleChannel(call: FlutterMethodCall, result: @escaping FlutterResult){
         if self.call!.method == "getPlatformVersion" {
-
-        } else if self.call!.method == "onNotificationTapListener" {
-            self.onNotificationTapListenerCall = call
-            self.onNotificationTapListenerResult = result
-        } else if self.call!.method == "onNotificationListener" {
-            self.onNotificationListenerCall = call
-            self.onNotificationListenerResult = result
+            
         } else if self.call!.method == "scheduleAlarm" {
             checkPermissionStatus()
         } else if self.call!.method == "removeScheduleAlarm" {
             self.stopScheduleAlarm()
+            
         } else {
             self.result!(FlutterMethodNotImplemented)
         }
@@ -248,7 +257,6 @@ public class CfnAlarmPlugin: NSObject, FlutterPlugin , UNUserNotificationCenterD
             
             // Create a trigger with the date components
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        
 
             // Create a notification request
             let request = UNNotificationRequest(identifier: String(id), content: content, trigger: trigger)

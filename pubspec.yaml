@@ -1,6 +1,6 @@
 name: cfn_alarm
 description: A new Flutter plugin for alarm.
-version: 0.0.5
+version: 0.0.6
 homepage: https://github.com/dev-chetan/cfn_alarm
 
 environment:

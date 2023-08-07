@@ -31,19 +31,4 @@ class MethodChannelCfnAlarm extends CfnAlarmPlatform {
         await methodChannel.invokeMethod<dynamic>('removeScheduleAlarm', id);
     return result;
   }
-
-  @override
-  Future<dynamic> onNotificationTapListener() async {
-    final result =
-        await methodChannel.invokeMethod<dynamic>('onNotificationTapListener');
-
-    return result;
-  }
-
-  @override
-  Future<dynamic> onNotificationListener() async {
-    final result =
-        await methodChannel.invokeMethod<dynamic>('onNotificationListener');
-    return result;
-  }
 }

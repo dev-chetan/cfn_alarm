@@ -13,3 +13,6 @@
 ## 0.0.5
 
 * TODO: [IOS] Minor bug fix 
+
+## 0.0.5
+* TODO: [IOS] Working callback second time with minor bug fix. 

@@ -6,6 +6,12 @@ import 'package:cfn_alarm/models/alarm_setting.dart';
 import 'package:intl/intl.dart';
 
 void main() {
+
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  CfnAlarm.init();
+
   runApp(const MyApp());
 }
 
@@ -23,33 +29,32 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
     initCallBack();
+
+
+    initPlatformState();
   }
 
   /// NOTE : DATE TIME SET THIS FORMAT : yyyy-MM-dd HH:mm:ss
   Future<void> initPlatformState() async {
-    CfnAlarm.onNotificationListener().asStream().listen((event) {
-      print("onNotificationListener : ${event.toJson()}");
-    });
-
-    CfnAlarm.onNotificationTapListener().asStream().listen((event) {
-      print("onNotificationListener : ${event.toJson()}");
-    });
     var initScheduleAlarm = await CfnAlarm.initScheduleAlarm(
         setting: AlarmSetting(
             id: 123,
             dateTime: DateFormat('yyyy-MM-dd HH:mm:ss')
-                .format(DateTime.now().copyWith(second: 0, minute: 44)),
+                .format(DateTime.now().copyWith(second: 0, minute: 6)),
             audioPath: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
             title: "Notification",
-            // loopAudio: true,
-            // vibrate: false,
             body: "Notification body",
             audioType: AudioType.network));
     setState(() {
       _platformVersion = initScheduleAlarm!.toString();
     });
+  }
+
+  @override
+  void dispose() {
+    CfnAlarm.onCancel();
+    super.dispose();
   }
 
   @override
@@ -66,6 +71,8 @@ class _MyAppState extends State<MyApp> {
             const SizedBox(height: 35),
             TextButton(
                 onPressed: () async {
+                  // var s = await CfnAlarm.getPlatformVersion();
+                  // debugPrint('DATA : $s');
                   var initScheduleAlarm =
                       await CfnAlarm.removeScheduleAlarm(id: 123);
                   setState(() {
@@ -80,8 +87,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initCallBack() async {
-    // CfnAlarm.onNotificationListener().asStream().listen((event) {
-    //   print("onNotificationListener : $event");
-    // });
+    CfnAlarm.onReceived.stream.listen((event) {
+      print("event.id : ${event.id}");
+    });
+
+    CfnAlarm.onTapReceived.stream.listen((event) {
+      print("onTapReceived.id : ${event.id}");
+    });
   }
 }

@@ -1,11 +1,70 @@
+import 'dart:async';
+
 import 'package:cfn_alarm/app_enums.dart';
+import 'package:flutter/services.dart';
 
 import 'cfn_alarm_platform_interface.dart';
 import 'models/alarm_setting.dart';
 
 class CfnAlarm {
-  Future<String?> getPlatformVersion() {
+  static final StreamController<AlarmSetting> onReceived =
+      StreamController<AlarmSetting>();
+
+  static final StreamController<AlarmSetting> onTapReceived =
+      StreamController<AlarmSetting>();
+
+  static Future<String?> getPlatformVersion() {
     return CfnAlarmPlatform.instance.getPlatformVersion();
+  }
+
+  static onCancel() {
+    onReceived.onCancel!();
+    onTapReceived.onCancel!();
+  }
+
+  static init() {
+    const eventChannel = EventChannel("dev_chetan_onReceived");
+    eventChannel.receiveBroadcastStream().listen((dynamic event) {
+
+      print(event);
+
+      var callBack = event['onReceived'];
+      var callBackTap = event['onTapReceived'];
+
+      if (callBack != null) {
+        var alarmSetting = AlarmSetting(
+            id: callBack['id'],
+            dateTime: callBack['dateTime'],
+            audioPath: callBack['audioPath'],
+            title: callBack['title'],
+            body: callBack['body'],
+            audioType: getAudioType(callBack['audioType']),
+            loopAudio: callBack['loopAudio'],
+            vibrate: callBack['vibrate'],
+            subTitle: callBack['subTitle'],
+            filePath: callBack['filePath'],
+            snoozeStatus: callBack['snoozeStatus'],
+            barrierDismissible: callBack['barrierDismissible']);
+        onReceived.sink.add(alarmSetting);
+      }
+
+      if (callBackTap != null) {
+        var alarmSetting = AlarmSetting(
+            id: callBackTap['id'],
+            dateTime: callBackTap['dateTime'],
+            audioPath: callBackTap['audioPath'],
+            title: callBackTap['title'],
+            body: callBackTap['body'],
+            audioType: getAudioType(callBackTap['audioType']),
+            loopAudio: callBackTap['loopAudio'],
+            vibrate: callBackTap['vibrate'],
+            subTitle: callBackTap['subTitle'],
+            filePath: callBackTap['filePath'],
+            snoozeStatus: callBackTap['snoozeStatus'],
+            barrierDismissible: callBackTap['barrierDismissible']);
+        onTapReceived.sink.add(alarmSetting);
+      }
+    });
   }
 
   static Future<dynamic> initScheduleAlarm(
@@ -15,40 +74,6 @@ class CfnAlarm {
 
   static Future<dynamic> removeScheduleAlarm({required int id}) async {
     return await CfnAlarmPlatform.instance.removeScheduleAlarm(id: id);
-  }
-
-  static Future<AlarmSetting> onNotificationTapListener() async {
-    var result = await CfnAlarmPlatform.instance.onNotificationTapListener();
-    return AlarmSetting(
-        id: result['id'],
-        dateTime: result['dateTime'],
-        audioPath: result['audioPath'],
-        title: result['title'],
-        body: result['body'],
-        audioType: getAudioType(result['audioType']),
-        loopAudio: result['loopAudio'],
-        vibrate: result['vibrate'],
-        subTitle: result['subTitle'],
-        filePath: result['filePath'],
-        snoozeStatus: result['snoozeStatus'],
-        barrierDismissible: result['barrierDismissible']);
-  }
-
-  static Future<AlarmSetting> onNotificationListener() async {
-    var result = await CfnAlarmPlatform.instance.onNotificationListener();
-    return AlarmSetting(
-        id: result['id'],
-        dateTime: result['dateTime'],
-        audioPath: result['audioPath'],
-        title: result['title'],
-        body: result['body'],
-        audioType: getAudioType(result['audioType']),
-        loopAudio: result['loopAudio'],
-        vibrate: result['vibrate'],
-        subTitle: result['subTitle'],
-        filePath: result['filePath'],
-        snoozeStatus: result['snoozeStatus'],
-        barrierDismissible: result['barrierDismissible']);
   }
 
   static AudioType getAudioType(result) {

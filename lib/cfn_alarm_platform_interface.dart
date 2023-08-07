@@ -37,12 +37,4 @@ abstract class CfnAlarmPlatform extends PlatformInterface {
   Future<dynamic> removeScheduleAlarm({required int id}) {
     throw UnimplementedError('removeScheduleAlarm() has not been implemented.');
   }
-
-  Future<dynamic> onNotificationTapListener() {
-    throw UnimplementedError('onNotificationTapListener() has not been implemented.');
-  }
-
-  Future<dynamic> onNotificationListener() {
-    throw UnimplementedError('onNotificationListener() has not been implemented.');
-  }
 }
